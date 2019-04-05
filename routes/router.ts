@@ -1,3 +1,4 @@
+import { EncuestaData } from '../classes/encuesta';
 import { GraficaData } from './../classes/grafica';
 import {Router, Request, Response}  from 'express';
 import Server from '../classes/server';
@@ -7,8 +8,42 @@ export const router = Router();
 
 
 export const grafica = new GraficaData();
- 
-//GRAFICAS
+export const encuesta = new EncuestaData();
+
+// =========================================================
+// 'Grafica de encuentas'
+// =========================================================
+router.get('/encuesta',(req : Request, res : Response, next)=>{
+    res.status(200).json({
+        ok:true,
+        encuesta : encuesta.getDataGrafica()
+    });
+})
+
+router.post('/encuesta',(req : Request, res : Response, next)=>{
+    const opcion = req.body.opcion;
+    const unidades = Number(req.body.unidades);
+    const server = Server.instace;
+
+    encuesta.incrementValue(opcion, unidades);
+
+    const payload = { 
+        ok:true,
+        encuesta : encuesta.getDataGrafica()
+    };
+
+    server.io.emit('grafica-encuesta',payload);
+
+    res.status(200).json({
+        ok:true,
+        encuesta : encuesta.getDataGrafica()
+    });
+})
+
+
+// =========================================================
+// 'Grafica de prueba con sockets'
+// =========================================================
 router.get('/grafica',(req : Request, res : Response, next)=>{
     res.status(200).json({
         ok:true,
