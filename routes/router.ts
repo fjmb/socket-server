@@ -1,9 +1,41 @@
+import { GraficaData } from './../classes/grafica';
 import {Router, Request, Response}  from 'express';
 import Server from '../classes/server';
 import { usuariosConectados } from '../sockets/socket';
 
 export const router = Router();
+
+
+export const grafica = new GraficaData();
  
+//GRAFICAS
+router.get('/grafica',(req : Request, res : Response, next)=>{
+    res.status(200).json({
+        ok:true,
+         grafica : grafica.getDataGrafica()
+    });
+})
+
+router.post('/grafica',(req : Request, res : Response, next)=>{
+    const mes = req.body.mes;
+    const unidades = Number(req.body.unidades);
+    const server = Server.instace;
+
+    grafica.incrementValue(mes,unidades);
+
+    const payload = { 
+        ok:true,
+        grafica : grafica.getDataGrafica()
+    };
+
+    server.io.emit('cambio-grafica',payload);
+
+    res.status(200).json({
+        ok:true,
+         grafica : grafica.getDataGrafica()
+    });
+})
+//MENSAJES
 router.get('/mensajes',(req : Request, res : Response, next)=>{
     res.status(200).json({
         ok:true,
